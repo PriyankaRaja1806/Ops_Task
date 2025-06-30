@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Prompt for the process name
+
 read -p "Enter the process name: " pname
 
-# Function to view process tree
+
 view_processes() {
 echo "Process tree for '$pname':"
 pids=$(pgrep -d, -x "$pname")
@@ -14,7 +14,7 @@ pstree -p $pids
 fi
 }
 
-# Function to kill process and its subprocesses
+
 kill_processes() {
 pids=$(pgrep -x "$pname")
 if [[ -z "$pids" ]]; then
@@ -32,7 +32,7 @@ fi
 fi
 }
 
-# Prompt for action
+
 echo "Choose an option:"
 echo "1) View"
 echo "2) Kill"
