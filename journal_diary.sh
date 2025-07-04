@@ -1,29 +1,92 @@
+
 #!/bin/bash
-mkdir -p /home/priyanka/my_personal_diary
 
-current_date=$(date +%F)
+DIARY_DIR="/home/priyanka/My_diary_book"
+mkdir -p "$DIARY_DIR"
 
-if [ "$1" == "current" ]; then
-diary_date=$current_date
-else
-random_days=$(( RANDOM % 365 ))
-diary_date=$(date -d "-$random_days days" +%F)
-fi
+while true; do
 
-diary_file="/home/priyanka/my_personal_diary/$diary_date.txt"
+    echo "My Diary"
+    echo "=============================="
+    echo "Select an option : "
+    echo "1) Create New Diary Entry "
+    echo "2) View/Edit Today's Diary"
+    echo "3) View/Edit Yesterday's Diary"
+    echo "4) Exit"
+    echo "=============================="
+    read -p "Enter your option : " choice
 
-if [ ! -f "$diary_file" ]; then
-touch "$diary_file"
-echo "My diary for $diary_date created: $diary_file"
-else
-echo "My diary for $diary_date already exists."
-fi
+    case $choice in
+        1)
 
-# Get user input for the diary entry
-echo "Write your diary entry for $diary_date (press Enter when done):"
-read diary_entry
+            read -p "Enter a title : " USER_INPUT
+            TODAY_DATE=$(date '+%Y-%m-%d')
+            FILENAME="${TODAY_DATE}_${USER_INPUT}.txt"
+            FILEPATH="$DIARY_DIR/$FILENAME"
 
-# Save the entry with a timestamp
-echo "[$(date '+%H:%M:%S')] $diary_entry" >> "$diary_file"
+            echo "Diary Entry - $(date '+%Y-%m-%d %H:%M:%S')" > "$FILEPATH"
+            echo "-------------------------------------------" >> "$FILEPATH"
+            echo "" >> "$FILEPATH"
 
-echo "Your entry has been saved in $diary_file"
+            echo "New diary created: $FILENAME"
+            nano "$FILEPATH"
+            echo "Your diary entry is saved at: $FILEPATH"
+            ;;
+       2)
+
+            TODAY_DATE=$(date '+%Y-%m-%d')
+            FILES=( $DIARY_DIR/${TODAY_DATE}_*.txt )
+
+            if [ ${#FILES[@]} -eq 0 ]; then
+                echo "No diary entries found for today: $TODAY_DATE"
+            else
+                echo "Available diaries for today:"
+                select FILE in "${FILES[@]}" "Cancel"; do
+                    if [[ "$FILE" == "Cancel" ]]; then
+                        break
+                    elif [ -n "$FILE" ]; then
+                        FILE_NAME=$(basename "$FILE")
+                        echo "Opening file: $FILE_NAME"
+                        nano "$FILE"
+                        echo "You edited the file: $FILE_NAME"
+                        break
+                    else
+                        echo "Invalid selection. Please try again."
+                    fi
+                done
+            fi
+            ;;
+        3)
+
+            YESTERDAY_DATE=$(date -d "yesterday" '+%Y-%m-%d')
+            FILES=( $DIARY_DIR/${YESTERDAY_DATE}_*.txt )
+
+            if [ ${#FILES[@]} -eq 0 ]; then
+                echo "No diary entries found for yesterday: $YESTERDAY_DATE"
+            else
+                echo "Available diaries for yesterday:"
+                select FILE in "${FILES[@]}" "Cancel"; do
+                    if [[ "$FILE" == "Cancel" ]]; then
+                        break
+                    elif [ -n "$FILE" ]; then
+                        FILE_NAME=$(basename "$FILE")
+                        echo "Opening file: $FILE_NAME"
+                        nano "$FILE"
+                        echo "You edited the file: $FILE_NAME"
+                        break
+                    else
+                        echo "Invalid selection. Please try again."
+                    fi
+                done
+            fi
+            ;;
+        4)
+            echo "Exiting diary....."
+            exit 0
+            ;;
+        *)
+            echo "Invalid choice. Please select 1, 2, 3, or 4."
+            ;;
+    esac
+    echo ""
+done
